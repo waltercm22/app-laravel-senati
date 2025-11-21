@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'; // 👈 agregado
+import { ref } from 'vue';
 
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
@@ -24,6 +24,7 @@ const decrement = () => count.value--;
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex flex-col items-center justify-center gap-6">
             <p class="text-amber-600 text-9xl">Contador</p>
+            <small>Walter Molina</small>
             <p class="text-6xl font-bold">{{ count }}</p>
             <div class="flex gap-4">
                 <button
