@@ -24,6 +24,12 @@ Route::get('contador', function () {
 })->middleware(['auth', 'verified'])->name('contador');
 
 
+//inertiajs
+Route::get('categoria', function () {
+    return Inertia::render('Categoria');
+})->middleware(['auth', 'verified'])->name('categoria');
+
+
 Route::get('categorias-data',[CategoriaController::class, 'listarCategoria']);
 
 
