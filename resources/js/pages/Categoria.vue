@@ -5,6 +5,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import axios from 'axios';
 import { Ban, Pencil, Plus, Save, Trash2 } from 'lucide-vue-next';
+import Swal from 'sweetalert2';
 import { onMounted, ref } from 'vue';
 
 const categorias = ref([]);
@@ -46,15 +47,70 @@ const cerrarModal = () => {
     mostrarModal.value = false;
 };
 
-const enviarFormulario = () => {
+const enviarFormulario = async () => {
     console.log('Walter Molina');
     console.log(formulario.value);
-}
+
+    const respuesta = await axios.post('/categorias-data', formulario.value);
+    if(respuesta.data.success){
+    Swal.fire({
+            title: "Creado",
+            text: "Categoria creada",
+            icon: "success",
+        });
+        mostrarModal.value = false;
+        listarCategoria();
+    }else{
+        Swal.fire({
+            title: "Error al crear",
+            text: "Categoria no creada",
+            icon: "error",
+        });
+    }
+};
+
+const eliminarCategoria = async (id: number) => {
+    Swal.fire({
+        title: "Estas seguro?",
+        text: "No podras revertirlo",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Aceptar",
+        cancelButtonText: "Cancelar",
+    }).then(async (result) => {
+
+        if (result.isConfirmed) {
+            try {
+                const respuesta = await axios.delete(`/categorias-data/${id}`);
+
+                if (respuesta.data.success) {
+                    Swal.fire({
+                        title: "Eliminado",
+                        text: "La categoria ha sido eliminada.",
+                        icon: "success"
+                    });
+                }
+
+            } catch (error) {
+                Swal.fire({
+                    title: "Error",
+                    text: "Ocurrio un problema al eliminar la categoria.",
+                    icon: "error"
+                });
+            }
+        }
+    });
+
+    listarCategoria();
+};
 
 onMounted(listarCategoria);
 </script>
 
 <template>
+
     <Head title="Categoria" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
@@ -65,39 +121,24 @@ onMounted(listarCategoria);
             </div>
             <div>
                 <div>
-                    <a
-                        class="group relative inline-flex items-center overflow-hidden rounded-sm border border-current px-8 py-3 text-emerald-900 dark:text-white"
-                        href="#"
-                        @click.prevent="abrirModal"
-                    >
-                        <span
-                            class="absolute -start-full transition-all group-hover:start-4"
-                        >
+                    <a class="group relative inline-flex items-center overflow-hidden rounded-sm border border-current px-8 py-3 text-emerald-900 dark:text-white"
+                        href="#" @click.prevent="abrirModal">
+                        <span class="absolute -start-full transition-all group-hover:start-4">
                             <Plus />
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M17 8l4 4m0 0l-4 4m4-4H3"
-                            ></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
                         </span>
 
-                        <span
-                            class="text-sm font-medium transition-all group-hover:ms-4"
-                        >
+                        <span class="text-sm font-medium transition-all group-hover:ms-4">
                             Agregar
                         </span>
                     </a>
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table
-                        class="min-w-full divide-y-2 divide-gray-200 dark:divide-gray-700"
-                    >
+                    <table class="min-w-full divide-y-2 divide-gray-200 dark:divide-gray-700">
                         <thead class="ltr:text-left rtl:text-right">
-                            <tr
-                                class="*:font-medium *:text-gray-900 dark:*:text-white"
-                            >
+                            <tr class="*:font-medium *:text-gray-900 dark:*:text-white">
                                 <th class="px-3 py-2 whitespace-nowrap">
                                     Nombre
                                 </th>
@@ -114,13 +155,9 @@ onMounted(listarCategoria);
                         </thead>
 
                         <tbody
-                            class="divide-y divide-gray-200 *:even:bg-gray-50 dark:divide-gray-700 dark:*:even:bg-gray-800"
-                        >
-                            <tr
-                                v-for="item in categorias"
-                                :key="item.id"
-                                class="*:text-gray-900 *:first:font-medium dark:*:text-white"
-                            >
+                            class="divide-y divide-gray-200 *:even:bg-gray-50 dark:divide-gray-700 dark:*:even:bg-gray-800">
+                            <tr v-for="item in categorias" :key="item.id"
+                                class="*:text-gray-900 *:first:font-medium dark:*:text-white">
                                 <td class="px-3 py-2 whitespace-nowrap">
                                     {{ item.nombre_categoria }}
                                 </td>
@@ -132,16 +169,14 @@ onMounted(listarCategoria);
                                 </td>
                                 <td class="px-3 py-2 whitespace-nowrap">
                                     <div class="flex flex-row gap-4">
-                                        <a
-                                            class="inline-block rounded-sm bg-cyan-700 px-8 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl"
+                                        <a class="inline-block rounded-sm bg-cyan-700 px-8 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl"
                                             href="#"
-                                        >
+                                >
                                             <Pencil />
                                         </a>
-                                        <a
-                                            class="inline-block rounded-sm border border-current px-8 py-3 text-sm font-medium text-pink-700 transition hover:scale-110 hover:shadow-xl"
+                                        <a class="inline-block rounded-sm border border-current px-8 py-3 text-sm font-medium text-pink-700 transition hover:scale-110 hover:shadow-xl"
                                             href="#"
-                                        >
+                                            @click="eliminarCategoria(item.id)">
                                             <Trash2 />
                                         </a>
                                     </div>
@@ -153,20 +188,10 @@ onMounted(listarCategoria);
 
                 <!-- Modal -->
 
-                <div
-                    class="fixed inset-0 z-50 grid place-content-center bg-black/50 p-4"
-                    role="dialog"
-                    aria-modal="true"
-                    aria-labelledby="modalTitle"
-                    v-if="mostrarModal"
-                >
-                    <div
-                        class="w-full max-w-md rounded-lg bg-white p-6 shadow-lg dark:bg-gray-900"
-                    >
-                        <h2
-                            id="modalTitle"
-                            class="text-xl font-bold text-gray-900 sm:text-2xl dark:text-white"
-                        >
+                <div class="fixed inset-0 z-50 grid place-content-center bg-black/50 p-4" role="dialog"
+                    aria-modal="true" aria-labelledby="modalTitle" v-if="mostrarModal">
+                    <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-lg dark:bg-gray-900">
+                        <h2 id="modalTitle" class="text-xl font-bold text-gray-900 sm:text-2xl dark:text-white">
                             Registro Categoria
                         </h2>
 
@@ -174,50 +199,36 @@ onMounted(listarCategoria);
                             <div class="mb-3">
                                 <br />
                                 <label for="nombre_categoria">
-                                    <span
-                                        class="text-sm font-medium text-gray-700 dark:text-gray-200"
-                                    >
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200">
                                         Nombre
                                     </span>
 
-                                    <input
-                                        type="text"
-                                        id="nombre_categoria"
-                                        v-model="formulario.nombre_categoria"
-                                        class="mt-0.5 w-full rounded border-gray-300 p-1 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
-                                    />
+                                    <input type="text" id="nombre_categoria" v-model="formulario.nombre_categoria"
+                                        class="mt-0.5 w-full rounded border-gray-300 p-1 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white" />
                                 </label>
                             </div>
                             <div class="mb-3">
                                 <br />
                                 <label for="descripcion">
-                                    <span
-                                        class="text-sm font-medium text-gray-700 dark:text-gray-200"
-                                    >
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200">
                                         Descripcion
                                     </span>
-                                    <textarea
-                                        id="descripcion"
-                                        v-model="formulario.descripcion"
+                                    <textarea id="descripcion" v-model="formulario.descripcion"
                                         class="mt-0.5 w-full resize-none rounded border-gray-300 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
-                                        rows="4"
-                                    ></textarea>
+                                        rows="4"></textarea>
                                 </label>
                             </div>
 
                             <footer class="mt-6 flex justify-end gap-2">
-                                <button
-                                    type="button"
+                                <button type="button"
                                     class="flex items-center justify-center gap-2 rounded bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-                                    @click="cerrarModal"
-                                >
+                                    @click="cerrarModal">
                                     <Ban /> Cancelar
                                 </button>
 
-                                <button
-                                    type="submit"
+                                <button type="submit"
                                     class="flex items-center justify-center gap-2 rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-                                >
+                                    >
                                     <Save /> Guardar
                                 </button>
                             </footer>
