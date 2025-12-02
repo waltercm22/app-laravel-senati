@@ -3,42 +3,71 @@
 namespace App\Http\Controllers;
 
 use App\Models\Categoria;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Exception;
 use Illuminate\Http\Request;
 
 class CategoriaController extends Controller
 {
     //CRUD
     //LISTAR
-    public function listarCategoria(){
-        // $categorias = Categoria::all();
-        $categorias = Categoria::orderBy('created_at','ASC')->get();
+    public function listarCategoria()
+    {
+        //$categorias = Categoria::all();
+        $categorias = Categoria::orderBy('created_at', 'desc')->get();
 
         return response()->json([
             'success' => true,
             'nombre' => 'Walter Molina',
             'data' => $categorias
-        ]
-        );
+        ]);
     }
-    public function guardarCategoria(Request $request){
-           $validate = $request->validate([
+
+    public function guardarCategoria(Request $request)
+    {
+        $validate = $request->validate([
             'descripcion' => 'required|string',
-            'nombre_categoria' => 'required|string',
-           ]);
+            'nombre_categoria' => 'required'
+        ]);
 
-              $categoria = Categoria::create($request->all());
+        try {
+            $categoria = Categoria::create($request->all());
 
-              return response()->json([
+            return response()->json([
+                'success' => true,
+                'nombre' => 'Walter Molina',
+                'data' => $categoria
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'nombre' => 'Walter Molina',
+                'data' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function editarCategoria(Request $request, $id_categoria) {
+        $validate = $request->validate([
+            'descripcion' => 'required|string',
+            'nombre_categoria' => 'required'
+        ]);
+
+        $categoria = Categoria::find($id_categoria);
+
+        $categoria->update([
+            'descripcion' => $request->descripcion,
+            'nombre_categoria' => $request->nombre_categoria,
+        ]);
+        return response()->json([
             'success' => true,
             'nombre' => 'Walter Molina',
             'data' => $categoria
-        ]
-        );
+        ]);
     }
-    public function editarCategoria(){
 
-    }
-    public function eliminarCategoria($id_categoria){
+    public function eliminarCategoria($id_categoria)
+    {
         $categoria = Categoria::findOrFail($id_categoria);
         $categoria->delete();
 
@@ -46,7 +75,21 @@ class CategoriaController extends Controller
             'success' => true,
             'nombre' => 'Walter Molina',
             'data' => $categoria
-        ]
-        );
+        ]);
     }
+
+
+    public function exportarPdfCategoria()
+    {
+        $categorias = Categoria::orderBy('created_at', 'desc')->get();
+
+        $pdf = Pdf::loadView('categorias.pdf',compact('categorias'));
+        
+        $pdf->setPaper('A4');
+
+         return $pdf->download('reporte_categoria.pdf');
+     }
+
+
+
 }
